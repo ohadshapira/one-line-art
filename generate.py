@@ -10,7 +10,6 @@ path_1 = image_1.sort()
 # path_2 = im_2.sort()
 # path_3 = im_3.sort()
 # path_4 = im_4.sort()
-# path_5 = im_5.sort()
 
 period_1, tup_circle_rads_1, tup_circle_locs_1 = Fourier(n_approx=1000, coord_1=path_1).get_circles()
 # period_2, tup_circle_rads_2, tup_circle_locs_2 = Fourier(n_approx = 1000, coord_1 = path_2).get_circles(mode=2)
