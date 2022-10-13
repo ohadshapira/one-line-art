@@ -10,8 +10,8 @@ from bisect import bisect
 from scipy.spatial.distance import cdist
 from collections import defaultdict
 
-from Config import Config
-import canny_edge_detector as ced
+from config import Config
+from canny_edge_detector import CannyEdgeDetector
 
 
 class Image(object):
@@ -65,7 +65,7 @@ class Image(object):
 
         if Config.CANNY_EDGE_DETECTOR:
 
-            detector = ced.cannyEdgeDetector(self.image, sigma=1.4, kernel_size=5, lowthreshold=0.09,
+            detector = CannyEdgeDetector(self.image, sigma=1.4, kernel_size=5, lowthreshold=0.09,
                                              highthreshold=0.17,
                                              weak_pixel=100)
             edges = detector.detect()
