@@ -4,6 +4,8 @@ from matplotlib import animation
 from matplotlib import pyplot as plt
 from matplotlib.patches import ConnectionPatch
 
+from utils import *
+
 
 class Plot(object):
     def __init__(self, period, tup_circles_rad, tup_circles_loc, speed=8, visualize=False):
@@ -103,6 +105,39 @@ class Plot(object):
         plt.cla()
         plt.close()
 
+    def generate_video(self, fourier_terms=None):
+        if self.visualize:
+            self.get_visualize()
+            update = self.update
+            time = self.time
+        for ax in self.axes:
+            ax.set_xlim(self.x_lim)
+            ax.set_ylim(self.y_lim)
+
+        if fourier_terms:
+            pass
+        else:
+            fourier_terms = self.tup_circles_loc[0].shape[0] - 1
+
+        time_terms = np.arange(0, 1, Config.VIDEO_STEP)
+        for idx,time_term in enumerate(time_terms):
+            time_term = max(int(min(self.period * time_term, self.period) - 1),0)
+
+            self.final_points[0].set_data(self.get_circle_loc_slice(0, 0, fourier_terms, time_term))
+            self.n_text.set_text(
+                'Number of Fourier Terms = {fourier_terms}, Progress:{precent}%'.format(fourier_terms=fourier_terms,
+                                                                                        precent=round(
+                                                                                            time_term / self.period,
+                                                                                            2)))
+            self.fig.savefig(Config.VIDEO_INPUT_PATH+str(idx).zfill(4)+'.png')
+
+        images_to_video()
+
+        try:
+            plt.show()
+        except Exception as e:  # _tkinter.TclError: invalid command name "pyimage10"
+            pass
+
     def show(self, fourier_terms=None, time_term=None):
         if self.visualize:
             self.get_visualize()
@@ -125,7 +160,8 @@ class Plot(object):
         self.n_text.set_text(
             'Number of Fourier Terms = {fourier_terms}, Progress:{precent}%'.format(fourier_terms=fourier_terms,
                                                                                     precent=round(
-                                                                                        time_term / self.period, 2)))
+                                                                                        time_term / self.period,
+                                                                                        2)))
 
         try:
             plt.show()
