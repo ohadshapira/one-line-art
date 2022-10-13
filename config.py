@@ -10,3 +10,8 @@ class Config(dict):
     OUTPUT_SHAPE = (400, 400)
     DROP_CONTOURS = False
     CONTOURS_THRESHOLD = 0.00008
+
+    CREATE_VIDEO=True
+    VIDEO_INPUT_PATH="video_inputs/"
+    VIDEO_OUTPUT_PATH="video_inputs/"
+    VIDEO_STEP=0.005

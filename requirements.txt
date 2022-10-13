@@ -1,3 +1,4 @@
 scipy
 matplotlib
 opencv-python
+moviepy
