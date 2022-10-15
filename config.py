@@ -11,6 +11,8 @@ class Config(dict):
     DROP_CONTOURS = True
     CONTOURS_THRESHOLD = 0.00006
 
+    SHOW_SLIDERS=False
+
     CREATE_VIDEO=True
     VIDEO_INPUT_PATH="video_inputs/"
     VIDEO_OUTPUT_PATH="video_inputs/"
