@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib import animation
 from matplotlib import pyplot as plt
 from matplotlib.patches import ConnectionPatch
+from matplotlib.widgets import Slider, Button, RadioButtons
 
 from utils import *
 
@@ -10,6 +11,26 @@ from utils import *
 class Plot(object):
     def __init__(self, period, tup_circles_rad, tup_circles_loc, speed=8, visualize=False):
         self.fig = plt.figure(1)
+        self.fig.subplots_adjust(bottom=0.25)
+
+        # Draw sliders
+        n_approx_0 = tup_circles_loc[0].shape[0]
+        n_approx_slider_ax = self.fig.add_axes([0.25, 0.15, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+        n_approx_slider = Slider(n_approx_slider_ax, 'n_approx', 0, n_approx_0, valinit=n_approx_0)
+
+        progress_0 = 1
+        progress_slider_ax = self.fig.add_axes([0.25, 0.1, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+        progress_slider = Slider(progress_slider_ax, 'progress', 0, 1, valinit=progress_0)
+
+        # Define an action for modifying the line when any slider's value changes
+        def sliders_on_changed(val):
+            # line.set_ydata(signal(amp_slider.val, freq_slider.val))
+            self.show(int(n_approx_slider.val),int(progress_slider.val))
+            self.fig.canvas.draw_idle()
+
+        n_approx_slider.on_changed(sliders_on_changed)
+        progress_slider.on_changed(sliders_on_changed)
+
         self.period = period
         self.tup_circles_loc = tup_circles_loc
         self.speed = speed
@@ -120,8 +141,8 @@ class Plot(object):
             fourier_terms = self.tup_circles_loc[0].shape[0] - 1
 
         time_terms = np.arange(0, 1, Config.VIDEO_STEP)
-        for idx,time_term in enumerate(time_terms):
-            time_term = max(int(min(self.period * time_term, self.period) - 1),0)
+        for idx, time_term in enumerate(time_terms):
+            time_term = max(int(min(self.period * time_term, self.period) - 1), 0)
 
             self.final_points[0].set_data(self.get_circle_loc_slice(0, 0, fourier_terms, time_term))
             self.n_text.set_text(
@@ -129,7 +150,7 @@ class Plot(object):
                                                                                         precent=round(
                                                                                             time_term / self.period,
                                                                                             2)))
-            self.fig.savefig(Config.VIDEO_INPUT_PATH+str(idx).zfill(4)+'.png')
+            self.fig.savefig(Config.VIDEO_INPUT_PATH + str(idx).zfill(4) + '.png')
 
         images_to_video()
 
