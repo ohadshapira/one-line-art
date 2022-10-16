@@ -43,6 +43,16 @@ class Image(object):
             contours = tuple(
                 contour for contour in contours if contour.shape[0] > self.image.size * Config.CONTOURS_THRESHOLD)
 
+        show_contours = True
+        if show_contours:
+            # create an empty image for contours
+            for c in range(len(contours)):
+                img_contours = np.zeros(self.image.shape)
+                # draw the contours on the empty image
+                cv2.drawContours(img_contours, contours, c, (255, 255, 255), 1)
+                plt.imshow(img_contours)
+            plt.close()
+
         acc_list = []
         for idx, (start, end, stride) in self.find_order(contours):
             if start is None and end is None and stride == -1:
@@ -66,8 +76,8 @@ class Image(object):
         if Config.CANNY_EDGE_DETECTOR:
 
             detector = CannyEdgeDetector(self.image, sigma=1.4, kernel_size=5, lowthreshold=0.09,
-                                             highthreshold=0.17,
-                                             weak_pixel=100)
+                                         highthreshold=0.17,
+                                         weak_pixel=100)
             edges = detector.detect()
 
             edges = edges.astype(np.uint8)
@@ -75,8 +85,16 @@ class Image(object):
             image = cv2.GaussianBlur(image, (5, 5), 0)
             edges = cv2.Canny(image, 100, 255)
 
-        ret, thresh = cv2.threshold(edges, 127, 255, 0)
-        contours, __ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        if Config.ERODE:
+            kernel = np.ones((3, 3), np.uint8)
+            image_erosion = cv2.erode(255 - edges, kernel, iterations=1)
+            # plt.imshow(image_erosion)
+            image_dilation = cv2.dilate(image_erosion, kernel, iterations=1)
+            # plt.imshow(image_dilation)
+            erode_dilate_edges = 255 - image_dilation
+
+        ret, thresh = cv2.threshold(erode_dilate_edges, 127, 255, 0)
+        contours, __ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # CHAIN_APPROX_NONE
 
         return contours
 

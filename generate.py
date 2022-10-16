@@ -16,7 +16,7 @@ period_1, tup_circle_rads_1, tup_circle_locs_1 = Fourier(n_approx=1000, coord_1=
 # Plot(period_1, tup_circle_rads_1, tup_circle_locs_1, speed=20, visualize=True).animate(close_after_animation=False)
 # Plot(period_1, tup_circle_rads_1, tup_circle_locs_1, speed=20).animate(close_after_animation=False)
 
-# Plot(period_1, tup_circle_rads_1, tup_circle_locs_1, visualize=True).generate_video()
+# Plot(period_1, tup_circle_rads_1, tup_circle_locs_1, visualize=True).generate_video(type='fourier')
 Plot(period_1, tup_circle_rads_1, tup_circle_locs_1, visualize=True).show()  # fourier_terms=1900,time_term=0.5
 
 # Plot(period_2, tup_circle_rads_2, tup_circle_locs_2, speed = 800).plot(close_after_animation = False)

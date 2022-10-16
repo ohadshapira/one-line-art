@@ -12,6 +12,7 @@ class Plot(object):
     def __init__(self, period, tup_circles_rad, tup_circles_loc, speed=8, visualize=False):
         self.fig = plt.figure(1)
 
+
         if Config.SHOW_SLIDERS:
             self.fig.subplots_adjust(bottom=0.25)
             # Draw sliders
@@ -115,7 +116,9 @@ class Plot(object):
             update, time = self.get_draw(close_after_animation=close_after_animation, save=save)
         for ax in self.axes:
             ax.set_xlim(self.x_lim)
+            ax.get_xaxis().set_visible(False)
             ax.set_ylim(self.y_lim)
+            ax.get_yaxis().set_visible(False)
         ani = animation.FuncAnimation(self.fig, update, time, interval=1, blit=True, repeat=close_after_animation)
         if save is True and ImageMagickLoc is not None:
             plt.rcParams['animation.convert_path'] = ImageMagickLoc
@@ -125,6 +128,7 @@ class Plot(object):
             # TODO(Darius): Figure out a way to get Matplotlib to close the figure nicely after animation is done
             try:
                 plt.show()
+                plt.axis('off')
             except Exception as e:  # _tkinter.TclError: invalid command name "pyimage10"
                 pass
 
@@ -132,36 +136,56 @@ class Plot(object):
         plt.cla()
         plt.close()
 
-    def generate_video(self, fourier_terms=None):
+    def generate_video(self, type='progress', fourier_terms=None):
+        Config.VIDEO_PATH = Config.VIDEO_PATH + return_time_str()
+        Config.VIDEO_IMAGES_PATH = Config.VIDEO_PATH + '/images/'
+        Config.VIDEO_OUTPUT_PATH = Config.VIDEO_PATH + '/video/'
+
+        os.mkdir(Config.VIDEO_PATH)
+        os.mkdir(Config.VIDEO_IMAGES_PATH)
+        os.mkdir(Config.VIDEO_OUTPUT_PATH)
+
         if self.visualize:
             self.get_visualize()
             update = self.update
             time = self.time
         for ax in self.axes:
             ax.set_xlim(self.x_lim)
+            ax.get_xaxis().set_visible(False)
             ax.set_ylim(self.y_lim)
+            ax.get_yaxis().set_visible(False)
 
         if fourier_terms:
             pass
         else:
             fourier_terms = self.tup_circles_loc[0].shape[0] - 1
+        if type == 'progress':
+            time_terms = np.arange(0, 1, Config.VIDEO_TIME_STEP)
+            for idx, time_term in enumerate(time_terms):
+                time_term = max(int(min(self.period * time_term, self.period) - 1), 0)
 
-        time_terms = np.arange(0, 1, Config.VIDEO_STEP)
-        for idx, time_term in enumerate(time_terms):
-            time_term = max(int(min(self.period * time_term, self.period) - 1), 0)
-
-            self.final_points[0].set_data(self.get_circle_loc_slice(0, 0, fourier_terms, time_term))
-            self.n_text.set_text(
-                'Number of Fourier Terms = {fourier_terms}, Progress:{precent}%'.format(fourier_terms=fourier_terms,
-                                                                                        precent=round(
-                                                                                            time_term / self.period,
-                                                                                            2)))
-            self.fig.savefig(Config.VIDEO_INPUT_PATH + str(idx).zfill(4) + '.png')
+                self.final_points[0].set_data(self.get_circle_loc_slice(0, 0, fourier_terms, time_term))
+                self.n_text.set_text(
+                    'Number of Fourier Terms = {fourier_terms}, Progress:{precent}%'.format(fourier_terms=fourier_terms,
+                                                                                            precent=round(
+                                                                                                time_term / self.period,
+                                                                                                2)))
+                self.fig.savefig(Config.VIDEO_IMAGES_PATH + str(idx).zfill(4) + '.png')
+        else:
+            fourier_terms = np.arange(0, self.tup_circles_loc[0].shape[0] - 1, Config.VIDEO_FOURIER_STEP)
+            full_time_term = max(int(min(self.period * 1, self.period) - 1), 0)
+            for idx, fourier_term in enumerate(fourier_terms):
+                self.final_points[0].set_data(self.get_circle_loc_slice(0, 0, fourier_term, full_time_term))
+                self.n_text.set_text(
+                    'Number of Fourier Terms = {fourier_terms}, Progress:{precent}%'.format(fourier_terms=fourier_term,
+                                                                                            precent=100))
+                self.fig.savefig(Config.VIDEO_IMAGES_PATH + str(idx).zfill(4) + '.png')
 
         images_to_video()
 
         try:
             plt.show()
+            plt.axis('off')
         except Exception as e:  # _tkinter.TclError: invalid command name "pyimage10"
             pass
 
@@ -172,7 +196,9 @@ class Plot(object):
             time = self.time
         for ax in self.axes:
             ax.set_xlim(self.x_lim)
+            ax.get_xaxis().set_visible(False)
             ax.set_ylim(self.y_lim)
+            ax.get_yaxis().set_visible(False)
 
         if fourier_terms:
             pass
@@ -193,6 +219,7 @@ class Plot(object):
 
         try:
             plt.show()
+            plt.axis('off')
         except Exception as e:  # _tkinter.TclError: invalid command name "pyimage10"
             pass
 

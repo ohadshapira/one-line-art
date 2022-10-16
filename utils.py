@@ -1,12 +1,21 @@
 from moviepy.editor import *
 import os
 from config import Config
+from datetime import datetime
+
+
+def return_time_str():
+    """customized time format"""
+    now = datetime.now()
+    # dd/mm/YY_H:M:S
+    dt_string = now.strftime("%d_%m_%Y_%H_%M_%S")
+    return dt_string
 
 
 def images_to_video():
-    images_path = Config.VIDEO_INPUT_PATH
+    images_path = Config.VIDEO_IMAGES_PATH
 
-    fps = 10
+    fps = Config.VIDEO_FPS
     image_files = [os.path.join(images_path, img)
                    for img in sorted(os.listdir(images_path))]
 
