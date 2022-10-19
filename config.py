@@ -6,21 +6,22 @@ class Config(dict):
     # INPUT_IMAGE_PATH="images/einstein.jpg"
     # INPUT_IMAGE_PATH="images/obama.jpg"
 
+    BACKGROUND_IMAGE = "images/einstein.jpg"
+
     OUTPUT_SHAPE = (400, 400)
     # OUTPUT_SHAPE = (400, 400)
 
-    ERODE=True
+    ERODE = True
     DROP_CONTOURS = True
     CONTOURS_THRESHOLD = 0.00005
 
     SHOW_SLIDERS = True
 
     CREATE_VIDEO = True
-    VIDEO_FPS=10
+    VIDEO_FPS = 10
     VIDEO_PATH = "video_inputs/"
     VIDEO_TIME_STEP = 0.005
-    VIDEO_FOURIER_STEP = 1
-
+    VIDEO_FOURIER_STEP = 130
 
     MAIL_ADDRESS = "pyohads@gmail.com"
     MAIL_PASSWORD = "Ohad5656105"

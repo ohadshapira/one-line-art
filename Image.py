@@ -15,7 +15,7 @@ from canny_edge_detector import CannyEdgeDetector
 
 
 class Image(object):
-    def __init__(self, image_location, shape=None):
+    def __init__(self, image_location, shape=None, background=True):
 
         self.image = cv2.imread(image_location)
 
@@ -25,6 +25,10 @@ class Image(object):
                 ratio = max(self.image.shape) / max(shape)
                 new_shape = tuple(int(ti / ratio) for ti in self.image.shape)
                 self.image = cv2.resize(self.image, new_shape)
+            if background:
+                self.background_image = cv2.imread(Config.BACKGROUND_IMAGE)
+                self.background_image = cv2.resize(self.background_image, new_shape)
+
         else:
             if shape:
                 self.image = cv2.resize(self.image, shape)
@@ -36,6 +40,9 @@ class Image(object):
         gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
 
         return gray
+
+    def get_background_image(self):
+        return self.background_image
 
     def sort(self):
         contours = self.find_contours()

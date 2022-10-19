@@ -9,23 +9,27 @@ from utils import *
 
 
 class Plot(object):
-    def __init__(self, period, tup_circles_rad, tup_circles_loc, speed=8, visualize=False):
+    def __init__(self, period, tup_circles_rad, tup_circles_loc, speed=8, visualize=False, background_image=None):
         self.fig = plt.figure(1)
 
+        self.use_background_image = False
+        if background_image is not None:
+            self.background_image = background_image
+            self.use_background_image = True
 
-        if Config.SHOW_SLIDERS:
-            self.fig.subplots_adjust(bottom=0.25)
-            # Draw sliders
-            n_approx_0 = tup_circles_loc[0].shape[0] - 1
-            n_approx_slider_ax = self.fig.add_axes([0.25, 0.15, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-            self.n_approx_slider = Slider(n_approx_slider_ax, 'n_approx', 0, n_approx_0, valinit=n_approx_0)
-
-            progress_0 = 1
-            progress_slider_ax = self.fig.add_axes([0.25, 0.1, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-            self.progress_slider = Slider(progress_slider_ax, 'progress', 0, 1, valinit=progress_0)
-
-            self.n_approx_slider.on_changed(self.sliders_on_changed)
-            self.progress_slider.on_changed(self.sliders_on_changed)
+        # if Config.SHOW_SLIDERS and False:
+        #     self.fig.subplots_adjust(bottom=0.25)
+        #     # Draw sliders
+        #     n_approx_0 = tup_circles_loc[0].shape[0] - 1
+        #     n_approx_slider_ax = self.fig.add_axes([0.25, 0.15, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+        #     self.n_approx_slider = Slider(n_approx_slider_ax, 'n_approx', 0, n_approx_0, valinit=n_approx_0)
+        #
+        #     progress_0 = 1
+        #     progress_slider_ax = self.fig.add_axes([0.25, 0.1, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+        #     self.progress_slider = Slider(progress_slider_ax, 'progress', 0, 1, valinit=progress_0)
+        #
+        #     self.n_approx_slider.on_changed(self.sliders_on_changed)
+        #     self.progress_slider.on_changed(self.sliders_on_changed)
 
         self.period = period
         self.tup_circles_loc = tup_circles_loc
@@ -60,10 +64,21 @@ class Plot(object):
 
         else:
             self.axes = [self.fig.add_subplot(111)]
+
             # Point that draws the images
             self.final_points = (self.get_final_point(self.axes[0]),)
-            self.x_lim = np.amin(tup_circles_loc[0][-1].real), np.amax(tup_circles_loc[0][-1].real)
-            self.y_lim = np.amax(tup_circles_loc[0][-1].imag), np.amin(tup_circles_loc[0][-1].imag)
+            self.x_lim = np.floor(np.amin(tup_circles_loc[0][-1].real)), np.ceil(np.amax(tup_circles_loc[0][-1].real))
+            self.y_lim = np.floor(np.amax(tup_circles_loc[0][-1].imag)), np.ceil(np.amin(tup_circles_loc[0][-1].imag))
+
+            for ax in self.axes:
+                ax.set_xlim(self.x_lim)
+                ax.get_xaxis().set_visible(False)
+                ax.set_ylim(self.y_lim)
+                ax.get_yaxis().set_visible(False)
+
+            if self.use_background_image:
+                self.axes[0].imshow(self.background_image, extent=(
+                    int(self.x_lim[0]), int(self.x_lim[1]), int(self.y_lim[0]), int(self.y_lim[1])))
 
         if self.visualize is False:
             circle_lst = list()
@@ -114,11 +129,7 @@ class Plot(object):
             time = self.time
         else:
             update, time = self.get_draw(close_after_animation=close_after_animation, save=save)
-        for ax in self.axes:
-            ax.set_xlim(self.x_lim)
-            ax.get_xaxis().set_visible(False)
-            ax.set_ylim(self.y_lim)
-            ax.get_yaxis().set_visible(False)
+
         ani = animation.FuncAnimation(self.fig, update, time, interval=1, blit=True, repeat=close_after_animation)
         if save is True and ImageMagickLoc is not None:
             plt.rcParams['animation.convert_path'] = ImageMagickLoc
@@ -149,11 +160,6 @@ class Plot(object):
             self.get_visualize()
             update = self.update
             time = self.time
-        for ax in self.axes:
-            ax.set_xlim(self.x_lim)
-            ax.get_xaxis().set_visible(False)
-            ax.set_ylim(self.y_lim)
-            ax.get_yaxis().set_visible(False)
 
         if fourier_terms:
             pass
@@ -190,15 +196,24 @@ class Plot(object):
             pass
 
     def show(self, fourier_terms=None, time_term=None):
+        if Config.SHOW_SLIDERS:
+            self.fig.subplots_adjust(bottom=0.25)
+            # Draw sliders
+            n_approx_0 = self.tup_circles_loc[0].shape[0] - 1
+            n_approx_slider_ax = self.fig.add_axes([0.25, 0.15, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+            self.n_approx_slider = Slider(n_approx_slider_ax, 'n_approx', 0, n_approx_0, valinit=n_approx_0)
+
+            progress_0 = 1
+            progress_slider_ax = self.fig.add_axes([0.25, 0.1, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+            self.progress_slider = Slider(progress_slider_ax, 'progress', 0, 1, valinit=progress_0)
+
+            self.n_approx_slider.on_changed(self.sliders_on_changed)
+            self.progress_slider.on_changed(self.sliders_on_changed)
+
         if self.visualize:
             self.get_visualize()
             update = self.update
             time = self.time
-        for ax in self.axes:
-            ax.set_xlim(self.x_lim)
-            ax.get_xaxis().set_visible(False)
-            ax.set_ylim(self.y_lim)
-            ax.get_yaxis().set_visible(False)
 
         if fourier_terms:
             pass
