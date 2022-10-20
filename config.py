@@ -3,10 +3,10 @@ class Config(dict):
 
     INPUT_IMAGE_PATH = "images/pikachu.png"
     # INPUT_IMAGE_PATH="images/note.png"
-    # INPUT_IMAGE_PATH="images/einstein.jpg"
+    # INPUT_IMAGE_PATH = "images/einstein.jpg"
     # INPUT_IMAGE_PATH="images/obama.jpg"
 
-    BACKGROUND_IMAGE = "images/einstein.jpg"
+    BACKGROUND_IMAGE = "images/obama.jpg"
 
     OUTPUT_SHAPE = (400, 400)
     # OUTPUT_SHAPE = (400, 400)

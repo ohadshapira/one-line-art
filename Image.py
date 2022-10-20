@@ -1,12 +1,11 @@
 import cv2
 import numpy as np
-
 from matplotlib import pyplot as plt
 
-# Image.find_order(contours)
+# Image.find_order
 from bisect import bisect
 
-# Image.find_paths(contours)
+# Image.find_paths
 from scipy.spatial.distance import cdist
 from collections import defaultdict
 
@@ -44,7 +43,8 @@ class Image(object):
     def get_background_image(self):
         return self.background_image
 
-    def sort(self):
+    # ohad Change
+    def find_path(self):
         contours = self.find_contours()
         if Config.DROP_CONTOURS:
             contours = tuple(
@@ -71,10 +71,6 @@ class Image(object):
             else:
                 acc_list.append(contours[idx][start:end: stride])
         return np.vstack(acc_list)
-        # return np.vstack([contours[idx][start::-1] if start is None and end is None and stride == -1
-        #                   else contours[idx] if start is None and end is None and stride == 1
-        # else contours[idx][:end:-1] if start is None and end is not None and stride == -1
-        # else contours[idx][start:end:stride] for idx, (start, end, stride) in self.find_order(contours)])
 
     def find_contours(self):
         # https://wttech.blog/blog/2022/edge-detection-and-processing-using-canny-edge-detector-and-hough-transform/
@@ -95,9 +91,7 @@ class Image(object):
         if Config.ERODE:
             kernel = np.ones((3, 3), np.uint8)
             image_erosion = cv2.erode(255 - edges, kernel, iterations=1)
-            # plt.imshow(image_erosion)
             image_dilation = cv2.dilate(image_erosion, kernel, iterations=1)
-            # plt.imshow(image_dilation)
             erode_dilate_edges = 255 - image_dilation
 
         ret, thresh = cv2.threshold(erode_dilate_edges, 127, 255, 0)
@@ -105,6 +99,7 @@ class Image(object):
 
         return contours
 
+    # ohad Change
     def find_order(self, contours):
         # This function was written as recursive originally.
         # This function obtains a dictionary of connections from find_paths(contours)
@@ -136,6 +131,7 @@ class Image(object):
 
         return order
 
+    # ohad Change
     def find_paths(self, contours):
         # This function first gets a distance matrix from cdist(points, points)
         # Then consider a "blob" that contains contours[0] (all the points of contours[0])

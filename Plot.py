@@ -17,20 +17,6 @@ class Plot(object):
             self.background_image = background_image
             self.use_background_image = True
 
-        # if Config.SHOW_SLIDERS and False:
-        #     self.fig.subplots_adjust(bottom=0.25)
-        #     # Draw sliders
-        #     n_approx_0 = tup_circles_loc[0].shape[0] - 1
-        #     n_approx_slider_ax = self.fig.add_axes([0.25, 0.15, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-        #     self.n_approx_slider = Slider(n_approx_slider_ax, 'n_approx', 0, n_approx_0, valinit=n_approx_0)
-        #
-        #     progress_0 = 1
-        #     progress_slider_ax = self.fig.add_axes([0.25, 0.1, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-        #     self.progress_slider = Slider(progress_slider_ax, 'progress', 0, 1, valinit=progress_0)
-        #
-        #     self.n_approx_slider.on_changed(self.sliders_on_changed)
-        #     self.progress_slider.on_changed(self.sliders_on_changed)
-
         self.period = period
         self.tup_circles_loc = tup_circles_loc
         self.speed = speed
@@ -38,17 +24,8 @@ class Plot(object):
 
         # Two circle lists means we have to draw two images and two sets of circles.
         if len(tup_circles_rad) == 2:
-            # 224 is the bottom right subplot
-            # 222 is the top right subplot
-            # 221 is the top left subplot
-            # 223 is the bottom left subplot
             self.axes = [self.fig.add_subplot(int(i)) for i in ("224", "222", "221", "223")]
 
-            # bottom right/top left subplot = circles, bottom left/top right subplot = images
-            # axesA=axes[0], axesB=axes[3] connects bottom right subplot to top right subplot
-            # axesA=axes[0], axesB=axes[1] connects bottom right subplot to bottom left subplot
-            # axesA=axes[2], axesB=axes[3] connects top left subplot to top right subplot
-            # axesA=axes[2], axesB=axes[1] connects top left subplot to bottom left subplot
             self.con_patch_tup = tuple(self.get_con_patch((0, 0), (0, 0), axesA, axesB) for (axesA, axesB) in
                                        zip([0] * 2 + [2] * 2, [1, 3] * 2))
             self.add_con_patch(self.con_patch_tup)
@@ -139,7 +116,6 @@ class Plot(object):
             # TODO(Darius): Figure out a way to get Matplotlib to close the figure nicely after animation is done
             try:
                 plt.show()
-                plt.axis('off')
             except Exception as e:  # _tkinter.TclError: invalid command name "pyimage10"
                 pass
 
@@ -195,8 +171,8 @@ class Plot(object):
         except Exception as e:  # _tkinter.TclError: invalid command name "pyimage10"
             pass
 
-    def show(self, fourier_terms=None, time_term=None):
-        if Config.SHOW_SLIDERS:
+    def show(self, fourier_terms=None, time_term=None, show_sliders=False):
+        if Config.SHOW_SLIDERS and show_sliders:
             self.fig.subplots_adjust(bottom=0.25)
             # Draw sliders
             n_approx_0 = self.tup_circles_loc[0].shape[0] - 1
