@@ -1,6 +1,6 @@
 import numpy as np
 
-from matplotlib import animation
+from matplotlib import animation, lines
 from matplotlib import pyplot as plt
 from matplotlib.patches import ConnectionPatch
 from matplotlib.widgets import Slider, Button, RadioButtons
@@ -22,40 +22,22 @@ class Plot(object):
         self.speed = speed
         self.visualize = visualize
 
-        # Two circle lists means we have to draw two images and two sets of circles.
-        if len(tup_circles_rad) == 2:
-            self.axes = [self.fig.add_subplot(int(i)) for i in ("224", "222", "221", "223")]
+        self.axes = [self.fig.add_subplot(111)]
 
-            self.con_patch_tup = tuple(self.get_con_patch((0, 0), (0, 0), axesA, axesB) for (axesA, axesB) in
-                                       zip([0] * 2 + [2] * 2, [1, 3] * 2))
-            self.add_con_patch(self.con_patch_tup)
-            self.axes[1].set_zorder(-1)
-            self.axes[3].set_zorder(-1)
+        # Point that draws the images
+        self.final_points = (self.get_final_point(self.axes[0]),)
+        self.x_lim = np.floor(np.amin(tup_circles_loc[0][-1].real)), np.ceil(np.amax(tup_circles_loc[0][-1].real))
+        self.y_lim = np.floor(np.amax(tup_circles_loc[0][-1].imag)), np.ceil(np.amin(tup_circles_loc[0][-1].imag))
 
-            # Points that draws the images
-            self.final_points = (self.get_final_point(self.axes[1]), self.get_final_point(self.axes[3]))
-            self.x_lim = min(np.amin(tup_circles_loc[0][-1].real), np.amin(tup_circles_loc[1][-1].real)), max(
-                np.amax(tup_circles_loc[0][-1].real), np.amax(tup_circles_loc[1][-1].real))
-            self.y_lim = max(np.amax(tup_circles_loc[0][-1].imag), np.amax(tup_circles_loc[1][-1].imag)), min(
-                np.amin(tup_circles_loc[0][-1].imag), np.amin(tup_circles_loc[1][-1].imag))
+        for ax in self.axes:
+            ax.set_xlim(self.x_lim)
+            ax.get_xaxis().set_visible(False)
+            ax.set_ylim(self.y_lim)
+            ax.get_yaxis().set_visible(False)
 
-        else:
-            self.axes = [self.fig.add_subplot(111)]
-
-            # Point that draws the images
-            self.final_points = (self.get_final_point(self.axes[0]),)
-            self.x_lim = np.floor(np.amin(tup_circles_loc[0][-1].real)), np.ceil(np.amax(tup_circles_loc[0][-1].real))
-            self.y_lim = np.floor(np.amax(tup_circles_loc[0][-1].imag)), np.ceil(np.amin(tup_circles_loc[0][-1].imag))
-
-            for ax in self.axes:
-                ax.set_xlim(self.x_lim)
-                ax.get_xaxis().set_visible(False)
-                ax.set_ylim(self.y_lim)
-                ax.get_yaxis().set_visible(False)
-
-            if self.use_background_image:
-                self.axes[0].imshow(self.background_image, extent=(
-                    int(self.x_lim[0]), int(self.x_lim[1]), int(self.y_lim[0]), int(self.y_lim[1])))
+        if self.use_background_image:
+            self.axes[0].imshow(self.background_image, extent=(
+                int(self.x_lim[0]), int(self.x_lim[1]), int(self.y_lim[0]), int(self.y_lim[1])))
 
         if self.visualize is False:
             circle_lst = list()
@@ -201,7 +183,12 @@ class Plot(object):
         else:
             time_term = -1
             time_term = (self.period - 1)
+
+        # draw = self.get_circle_loc_slice(0, 0, fourier_terms, time_term)
+        # draw_2d = lines.Line2D(draw[0],draw[1], color='k', label='draw')
+
         self.final_points[0].set_data(self.get_circle_loc_slice(0, 0, fourier_terms, time_term))
+        # self.final_points[0].set_marker((1,1))
         self.n_text.set_text(
             'Number of Fourier Terms = {fourier_terms}, Progress:{precent}%'.format(fourier_terms=fourier_terms,
                                                                                     precent=100 * round(

@@ -50,7 +50,7 @@ class Image(object):
             contours = tuple(
                 contour for contour in contours if contour.shape[0] > self.image.size * Config.CONTOURS_THRESHOLD)
 
-        show_contours = True
+        show_contours = False
         if show_contours:
             # create an empty image for contours
             for c in range(len(contours)):
@@ -133,8 +133,9 @@ class Image(object):
 
     # ohad Change
     def find_paths(self, contours):
-        # This function first gets a distance matrix from cdist(points, points)
-        # Then consider a "blob" that contains contours[0] (all the points of contours[0])
+        # Gets a distance matrix from cdist(points, points)
+        # Sets the distance from contour to itself to infinity
+
         # This function then uses that distance matrix to find the closest point to blob
         # And then adding said closest point into the blob because it is now connected
         # And then ignoring said closest point's distance to the blob and vice versa by setting the distance in the distance matrix to np.inf.
