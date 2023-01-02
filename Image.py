@@ -19,7 +19,10 @@ class Image(object):
         self.image = cv2.imread(image_location)
 
         if Config.CANNY_EDGE_DETECTOR:
-            self.image = self.rgb2gray(self.image)
+            try:
+                self.image = self.rgb2gray(self.image)
+            except Exception as e:
+                raise e
             if shape:
                 ratio = max(self.image.shape) / max(shape)
                 new_shape = tuple(int(ti / ratio) for ti in self.image.shape)
@@ -43,37 +46,7 @@ class Image(object):
     def get_background_image(self):
         return self.background_image
 
-    # ohad Change
-    def find_path(self):
-        contours = self.find_contours()
-        if Config.DROP_CONTOURS:
-            contours = tuple(
-                contour for contour in contours if contour.shape[0] > self.image.size * Config.CONTOURS_THRESHOLD)
-
-        show_contours = False
-        if show_contours:
-            # create an empty image for contours
-            for c in range(len(contours)):
-                img_contours = np.zeros(self.image.shape)
-                # draw the contours on the empty image
-                cv2.drawContours(img_contours, contours, c, (255, 255, 255), 1)
-                plt.imshow(img_contours)
-            plt.close()
-
-        acc_list = []
-        for idx, (start, end, stride) in self.find_order(contours):
-            if start is None and end is None and stride == -1:
-                acc_list.append(contours[idx][start::-1])
-            elif start is None and end is None and stride == 1:
-                acc_list.append(contours[idx])
-            elif start is None and end is not None and stride == -1:
-                acc_list.append(contours[idx][:end: -1])
-            else:
-                acc_list.append(contours[idx][start:end: stride])
-        return np.vstack(acc_list)
-
     def find_contours(self):
-        # https://wttech.blog/blog/2022/edge-detection-and-processing-using-canny-edge-detector-and-hough-transform/
         image = self.image
 
         if Config.CANNY_EDGE_DETECTOR:
@@ -91,15 +64,46 @@ class Image(object):
         if Config.ERODE:
             kernel = np.ones((3, 3), np.uint8)
             image_erosion = cv2.erode(255 - edges, kernel, iterations=1)
+            kernel = np.ones((3, 3), np.uint8)
             image_dilation = cv2.dilate(image_erosion, kernel, iterations=1)
             erode_dilate_edges = 255 - image_dilation
+
+            # erode_dilate_edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
 
         ret, thresh = cv2.threshold(erode_dilate_edges, 127, 255, 0)
         contours, __ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # CHAIN_APPROX_NONE
 
         return contours
 
-    # ohad Change
+    # Need to optimize
+    def find_path(self):
+        contours = self.find_contours()
+        if Config.DROP_CONTOURS:
+            contours = tuple(
+                contour for contour in contours if contour.shape[0] > self.image.size * Config.CONTOURS_THRESHOLD)
+
+        show_contours = False  # debug use only
+        if show_contours:
+            img_contours = np.zeros(self.image.shape)
+            for c in range(len(contours)):
+                # draw the contours on a blank image
+                cv2.drawContours(img_contours, contours, c, (255, 255, 255), 1)
+                plt.imshow(img_contours)
+            plt.close()
+
+        acc_list = []
+        for idx, (start, end, stride) in self.find_order(contours):
+            if start is None and end is None and stride == -1:
+                acc_list.append(contours[idx][start::-1])
+            elif start is None and end is None and stride == 1:
+                acc_list.append(contours[idx])
+            elif start is None and end is not None and stride == -1:
+                acc_list.append(contours[idx][:end: -1])
+            else:
+                acc_list.append(contours[idx][start:end: stride])
+        return np.vstack(acc_list)
+
+    # Need to optimize
     def find_order(self, contours):
         # This function was written as recursive originally.
         # This function obtains a dictionary of connections from find_paths(contours)
@@ -131,7 +135,7 @@ class Image(object):
 
         return order
 
-    # ohad Change
+    # Need to optimize
     def find_paths(self, contours):
         # Gets a distance matrix from cdist(points, points)
         # Sets the distance from contour to itself to infinity

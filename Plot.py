@@ -52,8 +52,6 @@ class Plot(object):
                 circle_lst[n].pop(0)
             self.tup_circles_lst = tuple(circle_lst)
 
-            # Define an action for modifying the line when any slider's value changes
-
     def sliders_on_changed(self, val):
         self.final_points[0].set_data(self.get_circle_loc_slice(0, 0, int(self.n_approx_slider.val),
                                                                 int(self.progress_slider.val * self.period) - 1))
@@ -150,10 +148,10 @@ class Plot(object):
         try:
             plt.show()
             plt.axis('off')
-        except Exception as e:  # _tkinter.TclError: invalid command name "pyimage10"
-            pass
+        except Exception as e:
+            print(e)
 
-    def show(self, fourier_terms=None, time_term=None, show_sliders=False):
+    def show(self, fourier_terms=None, time_term=None, show_sliders=False, end_pointer=False):
         if Config.SHOW_SLIDERS and show_sliders:
             self.fig.subplots_adjust(bottom=0.25)
             # Draw sliders
@@ -181,13 +179,14 @@ class Plot(object):
         if time_term:
             time_term = int(min(self.period * time_term, self.period) - 1)
         else:
-            time_term = -1
             time_term = (self.period - 1)
 
         # draw = self.get_circle_loc_slice(0, 0, fourier_terms, time_term)
         # draw_2d = lines.Line2D(draw[0],draw[1], color='k', label='draw')
 
-        self.final_points[0].set_data(self.get_circle_loc_slice(0, 0, fourier_terms, time_term))
+        current_stage = self.get_circle_loc_slice(0, 0, fourier_terms, time_term)
+        self.final_points[0].set_data(current_stage)
+
         # self.final_points[0].set_marker((1,1))
         self.n_text.set_text(
             'Number of Fourier Terms = {fourier_terms}, Progress:{precent}%'.format(fourier_terms=fourier_terms,
@@ -199,11 +198,7 @@ class Plot(object):
             plt.show()
             plt.axis('off')
         except Exception as e:  # _tkinter.TclError: invalid command name "pyimage10"
-            pass
-
-        # plt.clf()
-        # plt.cla()
-        # plt.close()
+            print(e)
 
     def get_draw(self, close_after_animation, save):
         time = np.arange(0, self.period, self.speed)

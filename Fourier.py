@@ -13,7 +13,7 @@ class Fourier(object):
         # Avoid aliasing
         self.n_approx = self.complex_coord_1.size // 2 if n_approx > self.complex_coord_1.size // 2 else n_approx
 
-    # ohad Change
+    # Need to optimize
     def get_complex_transform(self):
         period = self.complex_coord_1.size
         time = np.arange(period)
